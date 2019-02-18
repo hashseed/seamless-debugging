@@ -72,7 +72,7 @@ async function GetPostBody(request) {
 async function Server(request, response) {
   try {
     if (request.method == 'POST') {
-      if (request.headers["user-agent"] === "Debugging") {
+      if (request.headers["DevTools"] === "step-in") {
         console.log("debugging");
         debugger;
       }

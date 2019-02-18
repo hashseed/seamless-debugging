@@ -1,0 +1,17 @@
+diff --git a/third_party/blink/renderer/devtools/front_end/sdk/DebuggerModel.js b/third_party/blink/renderer/devtools/front_end/sdk/DebuggerModel.js
+index 039ac57a4945..820639df6819 100644
+--- a/third_party/blink/renderer/devtools/front_end/sdk/DebuggerModel.js
++++ b/third_party/blink/renderer/devtools/front_end/sdk/DebuggerModel.js
+@@ -228,10 +228,12 @@ SDK.DebuggerModel = class extends SDK.SDKModel {
+   }
+ 
+   scheduleStepIntoAsync() {
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({ 'DevTools': 'step-in' });
+     this._agent.invoke_stepInto({breakOnAsyncCall: true});
+   }
+ 
+   resume() {
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({});
+     this._agent.resume();
+     this._isPausing = false;
+   }
