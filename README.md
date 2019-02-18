@@ -1,6 +1,6 @@
-= Seamless debugging =
+# Seamless debugging #
 
-== Preparations ==
+## Preparations ##
 
 Start server:
 ```bash
@@ -12,7 +12,7 @@ Note: you might need to free up the port
 fuser -k 8080/tcp
 ```
 
-== Demo instructions ==
+## Demo instructions ##
 
 * Point Chrome to the server at `localhost:8080`
 * Open DevTools (A).
