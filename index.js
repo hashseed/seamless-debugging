@@ -15,7 +15,7 @@ Convert me to upper case!
 </body>
 
 <script>
-async function CaseRequest(mode) {
+async function CaseRequest(case_mode) {
   let text = document.getElementById("input").value;
   let request = {
       method: "POST",
@@ -25,7 +25,7 @@ async function CaseRequest(mode) {
       headers: { "Content-Type": "application/json" },
       redirect: "follow", // manual, *follow, error
       referrer: "no-referrer", // no-referrer, *client
-      body: JSON.stringify({ text, mode }),
+      body: JSON.stringify({ text, case_mode }),
     };
   let response = await fetch('http://localhost:8080', request);
   let result = await response.json();
@@ -49,8 +49,8 @@ body {
 `
 
 function ProcessInput(request) {
-  let {text, mode} = JSON.parse(request);
-  switch (mode) {
+  let {text, case_mode} = JSON.parse(request);
+  switch (case_mode) {
     case "upper":
       text = text.toUpperCase();
       break;
@@ -72,6 +72,10 @@ async function GetPostBody(request) {
 async function Server(request, response) {
   try {
     if (request.method == 'POST') {
+      if (request.headers["user-agent"] === "Debugging") {
+        console.log("debugging");
+        debugger;
+      }
       let body = await GetPostBody(request);
       let result = ProcessInput(body);
       response.writeHead(200, {
