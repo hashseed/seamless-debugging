@@ -1,0 +1,57 @@
+diff --git a/lib/_http_server.js b/lib/_http_server.js
+index a899f651be..d8e1b0df3f 100644
+--- a/lib/_http_server.js
++++ b/lib/_http_server.js
+@@ -24,6 +24,7 @@
+ const util = require('util');
+ const net = require('net');
+ const assert = require('internal/assert');
++const { Session } = require('inspector');
+ const {
+   parsers,
+   freeParser,
+@@ -294,8 +295,43 @@ function Server(options, requestListener) {
+ 
+   net.Server.call(this, { allowHalfOpen: true });
+ 
++  const session = new Session();
++  session.connect();
++
++  // This is the internal objectId of the passed in requestListener.
++  let requestListenerObjectId;
++
++  // To retrieve it, we need to briefly pause the server during startup,
++  // take a stack trace, walk it to the "Server()" frame and evaluate the local
++  // variable. After that we resume.
++  session.on('Debugger.paused', (message) => {
++    for (let callFrame of message.params.callFrames) {
++      if (callFrame.functionName == "Server") {
++        session.post('Debugger.evaluateOnCallFrame', {expression: "requestListener", callFrameId: callFrame.callFrameId}, (err, result) => {
++          // console.log(result);
++          requestListenerObjectId = result.result.objectId;
++          session.on('Debugger.paused', () => {});
++          session.post('Debugger.resume');
++        });
++        break;
++      }
++    }
++  });
++
++  session.post('Debugger.enable', (err) => {
++    session.post('Debugger.pause');
++  });
++
+   if (requestListener) {
+-    this.on('request', requestListener);
++    this.on('request', (request, response) => {
++      if (request.headers['devtools'] === 'step-in' || request.headers['user-agent'] == 'Debugging') {
++        session.post('Debugger.setBreakpointOnFunctionCall', {objectId: requestListenerObjectId}, (err, result) => {
++          requestListener(request, response);
++        });
++      } else {
++        requestListener(request, response);
++      }
++    });
+   }
+ 
+   // Similar option to this. Too lazy to write my own docs.
