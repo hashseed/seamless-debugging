@@ -72,9 +72,8 @@ async function GetPostBody(request) {
 async function Server(request, response) {
   try {
     if (request.method == 'POST') {
-      if (request.headers["DevTools"] === "step-in") {
-        console.log("debugging");
-        debugger;
+      if (request.headers["devtools"]) {
+        console.log("DevTools is performing: " + request.headers["devtools"]);
       }
       let body = await GetPostBody(request);
       let result = ProcessInput(body);

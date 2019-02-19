@@ -1,3 +1,39 @@
+diff --git a/third_party/blink/renderer/devtools/front_end/sdk/CPUProfilerModel.js b/third_party/blink/renderer/devtools/front_end/sdk/CPUProfilerModel.js
+index 5377bbbca449..36b3bde567aa 100644
+--- a/third_party/blink/renderer/devtools/front_end/sdk/CPUProfilerModel.js
++++ b/third_party/blink/renderer/devtools/front_end/sdk/CPUProfilerModel.js
+@@ -120,6 +120,7 @@ SDK.CPUProfilerModel = class extends SDK.SDKModel {
+     this._isRecording = true;
+     const intervalUs = Common.moduleSetting('highResolutionCpuProfiling').get() ? 100 : 1000;
+     this._profilerAgent.setSamplingInterval(intervalUs);
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({ 'DevTools': 'profiling' });
+     return this._profilerAgent.start();
+   }
+ 
+@@ -128,6 +129,7 @@ SDK.CPUProfilerModel = class extends SDK.SDKModel {
+    */
+   stopRecording() {
+     this._isRecording = false;
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({});
+     return this._profilerAgent.stop();
+   }
+ 
+@@ -137,6 +139,7 @@ SDK.CPUProfilerModel = class extends SDK.SDKModel {
+   startPreciseCoverage() {
+     const callCount = false;
+     const detailed = true;
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({ 'DevTools': 'coverage' });
+     return this._profilerAgent.startPreciseCoverage(callCount, detailed);
+   }
+ 
+@@ -151,6 +154,7 @@ SDK.CPUProfilerModel = class extends SDK.SDKModel {
+    * @return {!Promise}
+    */
+   stopPreciseCoverage() {
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({});
+     return this._profilerAgent.stopPreciseCoverage();
+   }
+ 
 diff --git a/third_party/blink/renderer/devtools/front_end/sdk/DebuggerModel.js b/third_party/blink/renderer/devtools/front_end/sdk/DebuggerModel.js
 index 039ac57a4945..820639df6819 100644
 --- a/third_party/blink/renderer/devtools/front_end/sdk/DebuggerModel.js
@@ -15,3 +51,23 @@ index 039ac57a4945..820639df6819 100644
      this._agent.resume();
      this._isPausing = false;
    }
+diff --git a/third_party/blink/renderer/devtools/front_end/sdk/TracingManager.js b/third_party/blink/renderer/devtools/front_end/sdk/TracingManager.js
+index edaaa1b4348e..08dc52c88d15 100644
+--- a/third_party/blink/renderer/devtools/front_end/sdk/TracingManager.js
++++ b/third_party/blink/renderer/devtools/front_end/sdk/TracingManager.js
+@@ -84,6 +84,7 @@ SDK.TracingManager = class extends SDK.SDKModel {
+       throw new Error('Tracing is already started');
+     const bufferUsageReportingIntervalMs = 500;
+     this._activeClient = client;
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({ 'DevTools': 'tracing' });
+     return this._tracingAgent.start(
+         categoryFilter, options, bufferUsageReportingIntervalMs, SDK.TracingManager.TransferMode.ReportEvents);
+   }
+@@ -94,6 +95,7 @@ SDK.TracingManager = class extends SDK.SDKModel {
+     if (this._finishing)
+       throw new Error('Tracing is already being stopped');
+     this._finishing = true;
++    SDK.multitargetNetworkManager.setExtraHTTPHeaders({});
+     this._tracingAgent.end();
+   }
+ };
