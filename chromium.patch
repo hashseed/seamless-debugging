@@ -1,3 +1,15 @@
+diff --git a/third_party/blink/renderer/core/inspector/inspector_trace_events.cc b/third_party/blink/renderer/core/inspector/inspector_trace_events.cc
+index 82a88adf0344..8e6ec813f194 100644
+--- a/third_party/blink/renderer/core/inspector/inspector_trace_events.cc
++++ b/third_party/blink/renderer/core/inspector/inspector_trace_events.cc
+@@ -825,6 +825,7 @@ std::unique_ptr<TracedValue> inspector_receive_response_event::Data(
+   value->SetDouble("encodedDataLength", response.EncodedDataLength());
+   value->SetBoolean("fromCache", response.WasCached());
+   value->SetBoolean("fromServiceWorker", response.WasFetchedViaServiceWorker());
++  value->SetString("serverTiming", response.HttpHeaderField("server-timing"));
+   if (response.GetResourceLoadTiming()) {
+     value->BeginDictionary("timing");
+     RecordTiming(*response.GetResourceLoadTiming(), value.get());
 diff --git a/third_party/blink/renderer/devtools/front_end/sdk/CPUProfilerModel.js b/third_party/blink/renderer/devtools/front_end/sdk/CPUProfilerModel.js
 index 5377bbbca449..36b3bde567aa 100644
 --- a/third_party/blink/renderer/devtools/front_end/sdk/CPUProfilerModel.js
@@ -71,3 +83,29 @@ index edaaa1b4348e..08dc52c88d15 100644
      this._tracingAgent.end();
    }
  };
+diff --git a/third_party/blink/renderer/devtools/front_end/timeline/TimelineUIUtils.js b/third_party/blink/renderer/devtools/front_end/timeline/TimelineUIUtils.js
+index 2d5f4164c614..17b4ea060acb 100644
+--- a/third_party/blink/renderer/devtools/front_end/timeline/TimelineUIUtils.js
++++ b/third_party/blink/renderer/devtools/front_end/timeline/TimelineUIUtils.js
+@@ -1281,6 +1281,8 @@ Timeline.TimelineUIUtils = class {
+       request.previewElement = await Components.ImagePreview.build(target, request.url, false);
+     if (request.previewElement)
+       contentHelper.appendElementRow(Common.UIString('Preview'), request.previewElement);
++    if (request.serverTiming)
++      contentHelper.appendElementRow(Common.UIString('Server Timing'), Components.Linkifier.linkifyURL(request.serverTiming));
+     return contentHelper.fragment;
+   }
+ 
+diff --git a/third_party/blink/renderer/devtools/front_end/timeline_model/TimelineModel.js b/third_party/blink/renderer/devtools/front_end/timeline_model/TimelineModel.js
+index c0a9a2c0d7cd..aee7fc7576d1 100644
+--- a/third_party/blink/renderer/devtools/front_end/timeline_model/TimelineModel.js
++++ b/third_party/blink/renderer/devtools/front_end/timeline_model/TimelineModel.js
+@@ -1554,6 +1554,8 @@ TimelineModel.TimelineModel.NetworkRequest = class {
+       this.timing = eventData['timing'];
+     if (eventData['fromServiceWorker'])
+       this.fromServiceWorker = true;
++    if (eventData['serverTiming'])
++      this.serverTiming = eventData['serverTiming'];
+   }
+ 
+   /**

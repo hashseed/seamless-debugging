@@ -78,13 +78,14 @@ async function Server(request, response) {
       let body = await GetPostBody(request);
       let result = ProcessInput(body);
       response.writeHead(200, {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Server-Timing': 'server-timing'
       });
       response.write(result);
       response.end();
     } else {
       response.writeHead(200, {
-        'Content-Type': 'text/html'
+        'Content-Type': 'text/html',
       });
       response.write(html);
       response.end();
